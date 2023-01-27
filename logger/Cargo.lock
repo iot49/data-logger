@@ -580,6 +580,7 @@ version = "0.1.0"
 dependencies = [
  "defmt",
  "embassy-sync 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embassy-time",
  "static_cell",
 ]
 

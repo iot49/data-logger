@@ -5,6 +5,7 @@ use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 
 use crate::state_types::State;
 
+/// Choose sufficient capacity for ImmediatePublisher used by ble scanner
 const CAP : usize = 10;
 const SUBS: usize =  2;
 const PUBS: usize =  4;

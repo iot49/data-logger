@@ -1,5 +1,5 @@
 use defmt::Format;
-use usize;
+use embassy_time::Instant;
 
 #[derive(Copy, Clone, Format, Debug)]
 pub enum Event {
@@ -33,7 +33,7 @@ impl Timestamp {
     pub fn now() -> Self {
         Self {
             // TODO: set correct epoch, e.g. sec since 2000
-            epoch: 0 
+            epoch: Instant::now().as_secs() as usize
         }
     }
     pub fn epoch(&self) -> usize {
