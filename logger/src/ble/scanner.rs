@@ -12,14 +12,15 @@ use nrf_softdevice::Softdevice;
 use nrf_softdevice::ble::AddressType;
 use nrf_softdevice::ble::Address;
 
-use logger_lib::comm::{StateBus, StatePub};
+use logger_lib::comm::{StateBus, ImmediateStatePub};
 use logger_lib::state_types::*;
+
 
 const ADDRESS_FILTER: bool = true;
 
 type BleMacAddress = [u8; 6];
 
-fn scan_cb(_state_pub: &StatePub<'_>, addr: &BleMacAddress, key: u8, data: &[u8], rssi: i8) {
+fn scan_cb(state_pub: &ImmediateStatePub<'_>, addr: &BleMacAddress, key: u8, data: &[u8], rssi: i8) {
     match key {
         0x09 => { // name
             let name = core::str::from_utf8(&data).unwrap();
@@ -32,20 +33,11 @@ fn scan_cb(_state_pub: &StatePub<'_>, addr: &BleMacAddress, key: u8, data: &[u8]
                 let temp = i16::from_le_bytes(data[3..5].try_into().unwrap()) as f32 / 100.0;
                 let humi = u16::from_le_bytes(data[5..7].try_into().unwrap()) as f32 / 100.0;
                 let batt  = data[7];
-                let s = State {
-                    timestamp: Timestamp::now(),
-                    entity: Entity { 
-                        device: Device::Climate, 
-                        instance: 4, 
-                        attr: Attribute::Temperature 
-                    },
-                    value: Value::Number(temp)
-                };
-                debug!("{}", s);
-                match _state_pub.try_publish(s) {
-                    Ok(()) => {},
-                    Err(e) => error!("failed to send state {} to state_bus: {}", s, e)
-                }            
+                let dev = DeviceInstance::new(Device::Climate, 3);
+                state_pub.publish_immediate(State::new(dev, Attribute::Temperature, temp));
+                state_pub.publish_immediate(State::new(dev, Attribute::Humidity, humi));
+                state_pub.publish_immediate(State::new(dev, Attribute::BatteryLevel, batt as f32));
+                state_pub.publish_immediate(State::new(dev, Attribute::Rssi, rssi as f32));
                 debug!("{:x} {}dBm T = {}C  H = {}%  batt = {}%", addr, rssi, temp, humi, batt);
             } else {
                 debug!("{:x} {}dBm 0x{:02x} len={} {:x}", addr, rssi, key, data.len(), data);
@@ -64,7 +56,7 @@ fn scan_cb(_state_pub: &StatePub<'_>, addr: &BleMacAddress, key: u8, data: &[u8]
 #[embassy_executor::task]
 pub async fn main_task(sd: &'static Softdevice, comm: &'static StateBus) {
     debug!("scanner::main_task started");
-    let state_pub: StatePub = comm.publisher().unwrap();
+    let state_pub = comm.immediate_publisher();
     // filter advertisements by peer addresses
     let mut config = central::ScanConfig::default();
     let address = Address::new(AddressType::Public, [0x84, 0x8c, 0x26, 0x38, 0xc1, 0xa4]);

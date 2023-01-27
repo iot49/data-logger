@@ -14,6 +14,16 @@ pub struct State {
     pub value: Value,
 }
 
+impl State {
+    pub fn new(dev: DeviceInstance, attr: Attribute, value: f32) -> Self {
+        Self {
+            timestamp: Timestamp::now(),
+            entity: Entity { device_instance: dev, attr: attr },
+            value: Value::Number(value)
+        }
+    }
+}
+
 #[derive(Copy, Clone, Format, Debug)]
 pub struct Timestamp {
     epoch: usize
@@ -42,20 +52,44 @@ impl Timestamp {
 /// ```
 #[derive(Eq, PartialEq, Copy, Clone, Format, Debug)]
 pub struct Entity {
-    pub device: Device,
-    pub instance: u8,
+    pub device_instance: DeviceInstance,
     pub attr: Attribute
 }
 
 impl Default for Entity {
     fn default() -> Self {
-        Entity { 
-            device: Device::Forbidden, 
-            instance: 0, 
+        Self { 
+            device_instance: DeviceInstance::default(), 
             attr: Attribute::Unknown 
         }
     }
 }
+
+#[derive(Eq, PartialEq, Copy, Clone, Format, Debug)]
+pub struct DeviceInstance {
+    pub device: Device,
+    pub instance: u8,
+}
+
+impl Default for DeviceInstance {
+    fn default() -> Self {
+        Self { 
+            device: Device::Forbidden, 
+            instance: 0, 
+        }
+    }
+}
+
+impl DeviceInstance {
+    pub fn new(device: Device, instance: u8) -> Self {
+        assert!(instance < 255);
+        Self {
+            device: device,
+            instance: instance
+        }
+    }
+}
+
 
 /// Identifies a (physical) device, e.g. a `Gps`.
 /// Devices have attributes, e.g. `Longitude` and `Lattide` for a GPS,
