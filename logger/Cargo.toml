@@ -12,37 +12,37 @@ defmt = "0.3"
 defmt-rtt = "0.4"
 embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "integrated-timers", "nightly"] }
 embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
-embassy-stm32 = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "time-driver-tim2", "nightly"], optional = true }
 embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "nightly"] }
-# nrf-softdevice = { version = "0.1.0", path = "../nrf-softdevice/nrf-softdevice", features = ["defmt", "nrf52840", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
-# nrf-softdevice-s140 = { version = "0.1.1", path = "../nrf-softdevice/nrf-softdevice-s140" }
+embassy-sync = "0.1"
 embedded-hal = "0.2"
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
-heapless = "0.7"
-menu = "0.3"
 panic-probe = { version = "0.3", features = ["print-defmt"] }
-postcard = "1.0"
-serde = { version = "1.0", default-features = false }
+static_cell = "1.0"
 
-# common = { path = "../common", features = ["defmt"]}
+##################################################################################
+# TODO: enable correct architecture for nrf52833
+nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "nrf52840", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
+nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
+
+logger-lib = { path = "../logger-lib" }
 
 [[bin]]
 name = "logger"
 test = false
 bench = false
-doc = false
+doc = true
 
 [features]
 default = [
     "particle-xenon"
 ]
 
-particle-xenon = ["embassy-nrf/nrf52840", "_nrf"]
-microbit-v2 = ["embassy-nrf/nrf52833", "_nrf"]
+particle-xenon = ["embassy-nrf/nrf52840"]
+microbit-v2 = ["embassy-nrf/nrf52833"]
 
-# Internal features - not intended for setting explicitly
-_nrf = []
-_stm32 = []
+# make dev same as --release
+[profile.dev]
+opt-level = 3
 
 [profile.release]
 codegen-units = 1 # better optimizations

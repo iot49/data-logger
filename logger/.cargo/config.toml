@@ -1,6 +1,6 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 rustflags = [
-    # "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=-Tlink.x",
     "-C", "link-arg=-Tdefmt.x",
     "-C", "linker=flip-link",
 ]
@@ -10,7 +10,7 @@ runner = "probe-run --measure-stack"
 target = "thumbv7em-none-eabihf"
 
 [env]
-DEFMT_LOG = "debug"
+DEFMT_LOG = "info"
 PROBE_RUN_CHIP = "nrf52840_xxAA"
 
 # optionally specify a probe if more than one is available
