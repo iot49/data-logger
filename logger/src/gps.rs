@@ -1,6 +1,6 @@
 use crate::bsp;
 
-use defmt::debug;
+use defmt::*;
 use embassy_nrf::uarte::{self, Uarte};
 
 /// Read NMEA GPS

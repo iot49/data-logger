@@ -15,7 +15,6 @@ use nrf_softdevice::ble::Address;
 use logger_lib::comm::{StateBus, ImmediateStatePub};
 use logger_lib::state_types::*;
 
-
 const ADDRESS_FILTER: bool = true;
 
 type BleMacAddress = [u8; 6];
