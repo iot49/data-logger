@@ -192,6 +192,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "data-logger"
+version = "0.1.0"
+dependencies = [
+ "alloc-cortex-m",
+ "bno055",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embassy-time",
+ "embedded-hal 0.2.7",
+ "futures",
+ "logger-lib",
+ "nrf-softdevice",
+ "nrf-softdevice-s140",
+ "panic-probe",
+ "static_cell",
+]
+
+[[package]]
 name = "defmt"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -239,9 +262,9 @@ dependencies = [
  "cfg-if",
  "cortex-m",
  "critical-section",
- "embassy-executor 0.1.1 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-executor",
  "embassy-hal-common",
- "embassy-macros 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-macros",
  "embassy-sync 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
 ]
 
@@ -263,27 +286,14 @@ dependencies = [
 [[package]]
 name = "embassy-executor"
 version = "0.1.1"
-dependencies = [
- "atomic-polyfill 1.0.1",
- "cfg-if",
- "critical-section",
- "embassy-macros 0.1.0",
- "embassy-time 0.1.0",
- "futures-util",
- "log",
- "static_cell",
-]
-
-[[package]]
-name = "embassy-executor"
-version = "0.1.1"
 source = "git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128#b6c8505697f198b95545f352f6a94af24276b128"
 dependencies = [
  "atomic-polyfill 1.0.1",
  "cfg-if",
  "critical-section",
  "defmt",
- "embassy-macros 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-macros",
+ "embassy-time",
  "futures-util",
  "static_cell",
 ]
@@ -294,16 +304,6 @@ version = "0.1.0"
 source = "git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128#b6c8505697f198b95545f352f6a94af24276b128"
 dependencies = [
  "num-traits",
-]
-
-[[package]]
-name = "embassy-macros"
-version = "0.1.0"
-dependencies = [
- "darling",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -329,10 +329,10 @@ dependencies = [
  "defmt",
  "embassy-cortex-m",
  "embassy-embedded-hal",
- "embassy-executor 0.1.1 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-executor",
  "embassy-hal-common",
  "embassy-sync 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
- "embassy-time 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-time",
  "embassy-usb-driver",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0-alpha.9",
@@ -345,18 +345,6 @@ dependencies = [
  "nrf52833-pac",
  "nrf52840-pac",
  "rand_core",
-]
-
-[[package]]
-name = "embassy-sync"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
- "critical-section",
- "embedded-io 0.4.0",
- "futures-util",
- "heapless",
- "log",
 ]
 
 [[package]]
@@ -384,21 +372,6 @@ dependencies = [
  "embedded-io 0.4.0",
  "futures-util",
  "heapless",
-]
-
-[[package]]
-name = "embassy-time"
-version = "0.1.0"
-dependencies = [
- "atomic-polyfill 1.0.1",
- "cfg-if",
- "critical-section",
- "embassy-sync 0.1.0",
- "embedded-hal 0.2.7",
- "embedded-hal-async",
- "futures-util",
- "heapless",
- "log",
 ]
 
 [[package]]
@@ -631,44 +604,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "log"
-version = "0.4.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
-name = "logger"
-version = "0.1.0"
-dependencies = [
- "alloc-cortex-m",
- "bno055",
- "cortex-m",
- "cortex-m-rt",
- "defmt",
- "defmt-rtt",
- "embassy-executor 0.1.1",
- "embassy-nrf",
- "embassy-sync 0.1.0",
- "embassy-time 0.1.0",
- "embedded-hal 0.2.7",
- "futures",
- "logger-lib",
- "nrf-softdevice",
- "nrf-softdevice-s140",
- "panic-probe",
- "static_cell",
-]
-
-[[package]]
 name = "logger-lib"
 version = "0.1.0"
 dependencies = [
  "defmt",
  "embassy-sync 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "embassy-time 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
+ "embassy-time",
  "static_cell",
 ]
 
