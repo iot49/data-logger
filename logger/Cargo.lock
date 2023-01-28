@@ -32,27 +32,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "as-slice"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45403b49e3954a4b8428a0ac21a4b7afadccf92bfd96273f1a58cd4812496ae0"
-dependencies = [
- "generic-array 0.12.4",
- "generic-array 0.13.3",
- "generic-array 0.14.6",
- "stable_deref_trait",
-]
-
-[[package]]
-name = "as-slice"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "516b6b4f0e40d50dcda9365d53964ec74560ad4284da2e7fc97122cd83174516"
-dependencies = [
- "stable_deref_trait",
-]
-
-[[package]]
 name = "atomic-polyfill"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -68,18 +47,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d299f547288d6db8d5c3a2916f7b2f66134b15b8c1ac1c4357dd3b8752af7bb2"
 dependencies = [
  "critical-section",
-]
-
-[[package]]
-name = "atomic-pool"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58c5fc22e05ec2884db458bf307dc7b278c9428888d2b6e6fad9c0ae7804f5f6"
-dependencies = [
- "as-slice 0.1.5",
- "as-slice 0.2.1",
- "atomic-polyfill 1.0.1",
- "stable_deref_trait",
 ]
 
 [[package]]
@@ -351,31 +318,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "embassy-net"
-version = "0.1.0"
-dependencies = [
- "as-slice 0.2.1",
- "atomic-polyfill 1.0.1",
- "atomic-pool",
- "embassy-net-driver",
- "embassy-sync 0.1.0",
- "embassy-time 0.1.0",
- "embedded-io 0.4.0",
- "embedded-nal-async",
- "futures",
- "generic-array 0.14.6",
- "heapless",
- "log",
- "managed",
- "smoltcp",
- "stable_deref_trait",
-]
-
-[[package]]
-name = "embassy-net-driver"
-version = "0.1.0"
-
-[[package]]
 name = "embassy-nrf"
 version = "0.1.0"
 source = "git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128#b6c8505697f198b95545f352f6a94af24276b128"
@@ -524,29 +466,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "embedded-nal"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db9efecb57ab54fa918730f2874d7d37647169c50fa1357fecb81abee840b113"
-dependencies = [
- "heapless",
- "nb 1.0.0",
- "no-std-net 0.5.0",
-]
-
-[[package]]
-name = "embedded-nal-async"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0dc8f5d837a6e95e9ecad9b5503fff6ef12e16407706abed1d33fc61eaf90da8"
-dependencies = [
- "embedded-io 0.4.0",
- "embedded-nal",
- "heapless",
- "no-std-net 0.6.0",
-]
-
-[[package]]
 name = "embedded-storage"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -653,34 +572,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "generic-array"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffdf9f34f1447443d37393cc6c2b8313aebddcd96906caf34e54c68d8e57d7bd"
-dependencies = [
- "typenum",
-]
-
-[[package]]
-name = "generic-array"
-version = "0.13.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f797e67af32588215eaaab8327027ee8e71b9dd0b2b26996aedf20c030fce309"
-dependencies = [
- "typenum",
-]
-
-[[package]]
-name = "generic-array"
-version = "0.14.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bff49e947297f3312447abdca79f45f4738097cc82b06e72054d2223f601f1b9"
-dependencies = [
- "typenum",
- "version_check",
-]
-
-[[package]]
 name = "half"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -759,8 +650,6 @@ dependencies = [
  "defmt",
  "defmt-rtt",
  "embassy-executor 0.1.1",
- "embassy-net",
- "embassy-net-driver",
  "embassy-nrf",
  "embassy-sync 0.1.0",
  "embassy-time 0.1.0",
@@ -782,12 +671,6 @@ dependencies = [
  "embassy-time 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
  "static_cell",
 ]
-
-[[package]]
-name = "managed"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca88d725a0a943b096803bd34e73a4437208b6077654cc4ecb2947a5f91618d"
 
 [[package]]
 name = "memchr"
@@ -815,18 +698,6 @@ name = "nb"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "546c37ac5d9e56f55e73b677106873d9d9f5190605e41a856503623648488cae"
-
-[[package]]
-name = "no-std-net"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bcece43b12349917e096cddfa66107277f123e6c96a5aea78711dc601a47152"
-
-[[package]]
-name = "no-std-net"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43794a0ace135be66a25d3ae77d41b91615fb68ae937f904090203e81f755b65"
 
 [[package]]
 name = "nrf-softdevice"
@@ -1050,18 +921,6 @@ name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
-
-[[package]]
-name = "smoltcp"
-version = "0.8.1"
-source = "git+https://github.com/smoltcp-rs/smoltcp?rev=5740b765749b95c18aace5de8dc21cab75ba33d4#5740b765749b95c18aace5de8dc21cab75ba33d4"
-dependencies = [
- "bitflags",
- "byteorder",
- "cfg-if",
- "heapless",
- "managed",
-]
 
 [[package]]
 name = "spin"
