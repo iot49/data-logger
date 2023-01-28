@@ -1,0 +1,36 @@
+[package]
+edition = "2021"
+name = "embassy-std-examples"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["log"] }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["log", "std", "nightly", "integrated-timers"] }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["log", "std", "nightly"] }
+embassy-net = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features=[ "std", "nightly", "log", "medium-ethernet", "tcp", "udp", "dhcpv4"] }
+embassy-net-driver = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128" }
+embedded-io = { version = "0.4.0", features = ["async", "std", "futures"] }
+critical-section = { version = "1.1", features = ["std"] }
+
+async-io = "1.6.0"
+env_logger = "0.10.0"
+futures = { version = "0.3.17" }
+log = "0.4.14"
+nix = "0.26.2"
+libc = "0.2.101"
+clap = { version = "4.1.4", features = ["derive"] }
+rand_core = { version = "0.6.3", features = ["std"] }
+heapless = { version = "0.7.5", default-features = false }
+static_cell = "1.0"
+
+# Problem: 
+# use defmt::Format
+# logger-lib = { path = "../../logger-lib" }
+
+
+# embassy-sync = { version = "0.1.0", path = "../embassy/embassy-sync", features = ["log"] }
+# embassy-executor = { version = "0.1.0", path = "../embassy/embassy-executor", features = ["log", "std", "nightly", "integrated-timers"] }
+# embassy-time = { version = "0.1.0", path = "../embassy/embassy-time", features = ["log", "std", "nightly"] }
+# embassy-net = { version = "0.1.0", path = "../embassy/embassy-net", features=[ "std", "nightly", "log", "medium-ethernet", "tcp", "udp", "dhcpv4"] }
+# embassy-net-driver = { version = "0.1.0", path = "../embassy/embassy-net-driver" }
