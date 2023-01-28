@@ -21,6 +21,7 @@ use embassy_nrf::interrupt::Priority;
 use logger_lib::comm::StateBus;
 
 mod boards;
+mod imu;
 mod gps;
 mod ble;
 mod event_logger;
@@ -45,6 +46,7 @@ async fn main(spawner: Spawner) {
     config.gpiote_interrupt_priority = Priority::P2;
     config.time_interrupt_priority = Priority::P2;
     let p = embassy_nrf::init(config);
+    let (gps_peripherals, imu_peripherals) = bsp::init(p);
 
     // Inter-Task Communication
     static STATE_BUS: StateBus = StateBus::new();
@@ -52,8 +54,10 @@ async fn main(spawner: Spawner) {
     // Logging
     unwrap!(spawner.spawn(event_logger::main_task(&STATE_BUS)));
 
+    // IMU
+    unwrap!(spawner.spawn(imu::main_task(imu_peripherals)));
+
     // GPS
-    let gps_peripherals = bsp::init(p);
     unwrap!(spawner.spawn(gps::main_task(gps_peripherals)));
 
     // Bluetooth
