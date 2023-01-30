@@ -12,7 +12,7 @@ use nrf_softdevice::Softdevice;
 use nrf_softdevice::ble::AddressType;
 use nrf_softdevice::ble::Address;
 
-use logger_lib::comm::{StateBus, ImmediateStatePub};
+use crate::comm::{StateBus, ImmediateStatePub};
 use logger_lib::state_types::*;
 
 const ADDRESS_FILTER: bool = true;

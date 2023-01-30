@@ -1,5 +1,5 @@
 use defmt::*;
-use logger_lib::comm::{StateBus, StateSub};
+use crate::comm::{StateBus, StateSub};
 
 #[embassy_executor::task]
 pub async fn main_task(comm: &'static StateBus) {

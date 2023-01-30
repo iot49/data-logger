@@ -4,14 +4,17 @@
 use std::error::Error;
 use std::time::Duration;
 use tokio::time;
-use tokio::runtime;
 
 use btleplug::api::{Central, Manager as _, Peripheral, ScanFilter};
 use btleplug::platform::Manager;
 
+use logger_lib::comm::StateBus;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // pretty_env_logger::init();
+
+    let _s = StateBus::new();
 
     let manager = Manager::new().await?;
     let adapter_list = manager.adapters().await?;

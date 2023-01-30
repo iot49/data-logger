@@ -29,6 +29,8 @@ tokio = { version = "1.22.0", features = ["macros", "rt-multi-thread", "rt", "sy
 tokio-stream = { version = "0.1.11", features = ["sync"] }
 btleplug = { version = "0.10", features = ["serde"] }
 
+logger-lib = { path = "../../logger-lib" }
+
 [target.'cfg(target_os = "linux")'.dependencies]
 dbus = "0.9.6"
 bluez-async = "0.6.0"

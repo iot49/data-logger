@@ -1,9 +1,11 @@
+#![allow(dead_code)]
+
 use embassy_sync::pubsub::PubSubChannel;
 use embassy_sync::pubsub::publisher::{Publisher, ImmediatePublisher};
 use embassy_sync::pubsub::subscriber::Subscriber;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 
-use crate::state_types::State;
+use logger_lib::state_types::State;
 
 /// Choose sufficient capacity for ImmediatePublisher used by ble scanner
 const CAP : usize = 10;

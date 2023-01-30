@@ -1,13 +1,16 @@
+#[cfg(feature = "defmt")]
 use defmt::Format;
 use embassy_time::Instant;
 
-#[derive(Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub enum Event {
     StateUpdate(State),
     StateReport(State),
 }
 
-#[derive(Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub struct State {
     pub timestamp: Timestamp,
     pub entity: Entity,
@@ -24,7 +27,8 @@ impl State {
     }
 }
 
-#[derive(Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub struct Timestamp {
     epoch: usize
 }
@@ -50,7 +54,8 @@ impl Timestamp {
 ///     attr: Attribute::Longitude
 /// };
 /// ```
-#[derive(Eq, PartialEq, Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub struct Entity {
     pub device_instance: DeviceInstance,
     pub attr: Attribute
@@ -65,7 +70,8 @@ impl Default for Entity {
     }
 }
 
-#[derive(Eq, PartialEq, Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub struct DeviceInstance {
     pub device: Device,
     pub instance: u8,
@@ -99,7 +105,8 @@ impl DeviceInstance {
 /// Device is also used to identify unprogrammed flash:
 /// the "Forbidden" state is used for this purpose and
 /// may not be used for an actual device.
-#[derive(PartialEq, Eq, Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 #[repr(u8)]
 pub enum Device {
     Light,
@@ -117,7 +124,11 @@ pub enum Device {
 /// Limitation: each device may have only one instance of
 /// a particular attribute, e.g. Current. More general situations,
 /// e.g. input current and output current require two separate devices.
-#[derive(PartialEq, Eq, Copy, Clone, Format, Debug)]
+/// 
+/// TODO: consider combining with Value, e.g. Temperature(f32), Binary(OnOff)
+///       or support only numeric values? Unknown = NaN?
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub enum Attribute {
     Unknown,
     Voltage,      // [V]
@@ -135,8 +146,20 @@ pub enum Attribute {
     Latitude,     // [deg]
 }
 
+use core::fmt;
+impl fmt::Display for Attribute {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       match *self {
+           Attribute::Unknown => write!(f, "Unknown"),
+           Attribute::Temperature => write!(f, "T"),
+           _ => write!(f, "?")
+       }
+    }
+}
+
 /// Value of an Entity.
-#[derive(Copy, Clone, Format, Debug)]
+#[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "defmt", derive(Format))]
 pub enum Value {
     Unknown,
     Number(f32),

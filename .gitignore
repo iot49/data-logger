@@ -17,6 +17,7 @@ secrets.*
 resources/
 doc/nrf52/
 lsm6ds3tr/
+bno055/
 nrf-softdevice/
 embassy-start/
 embassy-repo/

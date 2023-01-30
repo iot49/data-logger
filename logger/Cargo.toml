@@ -25,8 +25,7 @@ nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git"
 static_cell = "1.0"
 bno055 = "0.3"
 
-logger-lib = { path = "../logger-lib" }
-
+logger-lib = { path = "../logger-lib", features = ["defmt"] }
 
 
 [[bin]]

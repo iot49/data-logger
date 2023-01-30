@@ -18,9 +18,8 @@ use panic_probe as _;
 use embassy_executor::Spawner;
 use embassy_nrf::interrupt::Priority;
 
-use logger_lib::comm::StateBus;
-
 mod boards;
+mod comm;
 mod imu;
 mod gps;
 mod ble;
@@ -49,7 +48,7 @@ async fn main(spawner: Spawner) {
     let (gps_peripherals, imu_peripherals) = bsp::init(p);
 
     // Inter-Task Communication
-    static STATE_BUS: StateBus = StateBus::new();
+    static STATE_BUS: comm::StateBus = comm::StateBus::new();
     
     // Logging
     unwrap!(spawner.spawn(event_logger::main_task(&STATE_BUS)));

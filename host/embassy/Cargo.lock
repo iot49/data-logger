@@ -112,9 +112,9 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "cc"
-version = "1.0.78"
+version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a20104e2335ce8a659d6dd92a51a767a0c062599c73b343fd152cb401e828c3d"
+checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
 
 [[package]]
 name = "cfg-if"
@@ -219,6 +219,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "defmt"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3a0ae7494d9bff013d7b89471f4c424356a71e9752e0c78abe7e6c608a16bb3"
+dependencies = [
+ "bitflags",
+ "defmt-macros",
+]
+
+[[package]]
+name = "defmt-macros"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8500cbe4cca056412efce4215a63d0bc20492942aeee695f23b624a53e0a6854"
+dependencies = [
+ "defmt-parser",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "defmt-parser"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0db23d29972d99baa3de2ee2ae3f104c10564a6d05a346eb3f4c4f2c0525a06e"
+
+[[package]]
 name = "embassy-executor"
 version = "0.1.1"
 source = "git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128#b6c8505697f198b95545f352f6a94af24276b128"
@@ -253,9 +282,9 @@ dependencies = [
  "atomic-polyfill 1.0.1",
  "atomic-pool",
  "embassy-net-driver",
- "embassy-sync",
+ "embassy-sync 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
  "embassy-time",
- "embedded-io",
+ "embedded-io 0.4.0",
  "embedded-nal-async",
  "futures",
  "generic-array 0.14.6",
@@ -281,17 +310,32 @@ dependencies = [
  "embassy-executor",
  "embassy-net",
  "embassy-net-driver",
- "embassy-sync",
+ "embassy-sync 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
  "embassy-time",
- "embedded-io",
+ "embedded-io 0.4.0",
  "env_logger",
  "futures",
  "heapless",
  "libc",
  "log",
+ "logger-lib",
  "nix",
  "rand_core",
  "static_cell",
+]
+
+[[package]]
+name = "embassy-sync"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6ea38e6ea5d0361d087680f786c19a1454becb06174790280534a3be05ed839"
+dependencies = [
+ "atomic-polyfill 1.0.1",
+ "cfg-if",
+ "critical-section",
+ "embedded-io 0.3.1",
+ "futures-util",
+ "heapless",
 ]
 
 [[package]]
@@ -301,7 +345,7 @@ source = "git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545
 dependencies = [
  "cfg-if",
  "critical-section",
- "embedded-io",
+ "embedded-io 0.4.0",
  "futures-util",
  "heapless",
  "log",
@@ -315,7 +359,8 @@ dependencies = [
  "atomic-polyfill 1.0.1",
  "cfg-if",
  "critical-section",
- "embassy-sync",
+ "defmt",
+ "embassy-sync 0.1.0 (git+https://github.com/embassy-rs/embassy.git?rev=b6c8505697f198b95545f352f6a94af24276b128)",
  "embedded-hal 0.2.7",
  "embedded-hal-async",
  "futures-util",
@@ -350,6 +395,12 @@ dependencies = [
 
 [[package]]
 name = "embedded-io"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33dfba9e6c113f2fd8537c943780a7345945e66c86972e356b1152e19481bcf5"
+
+[[package]]
+name = "embedded-io"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
@@ -374,7 +425,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0dc8f5d837a6e95e9ecad9b5503fff6ef12e16407706abed1d33fc61eaf90da8"
 dependencies = [
- "embedded-io",
+ "embedded-io 0.4.0",
  "embedded-nal",
  "heapless",
  "no-std-net 0.6.0",
@@ -687,6 +738,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "logger-lib"
+version = "0.1.0"
+dependencies = [
+ "defmt",
+ "embassy-sync 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embassy-time",
+ "static_cell",
 ]
 
 [[package]]
