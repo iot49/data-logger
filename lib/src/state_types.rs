@@ -2,27 +2,21 @@
 use defmt::Format;
 use embassy_time::Instant;
 
-#[derive(Copy, Clone, Debug)]
-#[cfg_attr(feature = "defmt", derive(Format))]
-pub enum Event {
-    StateUpdate(State),
-    StateReport(State),
-}
 
 #[derive(Copy, Clone, Debug)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct State {
     pub timestamp: Timestamp,
     pub entity: Entity,
-    pub value: Value,
+    pub value: f32,
 }
 
 impl State {
-    pub fn new(dev: DeviceInstance, attr: Attribute, value: f32) -> Self {
+    pub fn new(device: Device, attr: Attribute, value: f32) -> Self {
         Self {
             timestamp: Timestamp::now(),
-            entity: Entity { device_instance: dev, attr: attr },
-            value: Value::Number(value)
+            entity: Entity { device: device, attr: attr },
+            value: value,
         }
     }
 }
@@ -46,51 +40,38 @@ impl Timestamp {
 }
 
 /// Identifies a state, e.g. the temperature of a climate sensor.
-/// Example:
-/// ```
-/// let entity = Entity {
-///     device: Device::Gps,
-///     instance: 0,
-///     attr: Attribute::Longitude
-/// };
-/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct Entity {
-    pub device_instance: DeviceInstance,
+    pub device: Device,
     pub attr: Attribute
 }
 
-impl Default for Entity {
-    fn default() -> Self {
+impl Entity {
+    #[allow(dead_code)]
+    fn new(kind: DeviceKind, instance: u8, attr: Attribute) -> Self {
         Self { 
-            device_instance: DeviceInstance::default(), 
-            attr: Attribute::Unknown 
+            device: Device {
+                kind: kind,
+                instance: instance
+            }, 
+            attr: attr
         }
     }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(Format))]
-pub struct DeviceInstance {
-    pub device: Device,
+pub struct Device {
+    pub kind: DeviceKind,
     pub instance: u8,
 }
 
-impl Default for DeviceInstance {
-    fn default() -> Self {
-        Self { 
-            device: Device::Forbidden, 
-            instance: 0, 
-        }
-    }
-}
-
-impl DeviceInstance {
-    pub fn new(device: Device, instance: u8) -> Self {
+impl Device {
+    pub fn new(kind: DeviceKind, instance: u8) -> Self {
         assert!(instance < 255);
         Self {
-            device: device,
+            kind: kind,
             instance: instance
         }
     }
@@ -108,7 +89,7 @@ impl DeviceInstance {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 #[repr(u8)]
-pub enum Device {
+pub enum DeviceKind {
     Light,
     Switch,
     Tank,
@@ -124,9 +105,6 @@ pub enum Device {
 /// Limitation: each device may have only one instance of
 /// a particular attribute, e.g. Current. More general situations,
 /// e.g. input current and output current require two separate devices.
-/// 
-/// TODO: consider combining with Value, e.g. Temperature(f32), Binary(OnOff)
-///       or support only numeric values? Unknown = NaN?
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub enum Attribute {
@@ -144,31 +122,9 @@ pub enum Attribute {
     Binary,       // [On/Off]
     Longitude,    // [deg]
     Latitude,     // [deg]
+    Forbidden = 0xff
 }
 
-use core::fmt;
-impl fmt::Display for Attribute {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       match *self {
-           Attribute::Unknown => write!(f, "Unknown"),
-           Attribute::Temperature => write!(f, "T"),
-           _ => write!(f, "?")
-       }
-    }
-}
-
-/// Value of an Entity.
-#[derive(Copy, Clone, Debug)]
-#[cfg_attr(feature = "defmt", derive(Format))]
-pub enum Value {
-    Unknown,
-    Number(f32),
-    On,
-    Off,
-}
-
-impl Default for Value {
-    fn default() -> Self {
-        Value::Unknown
-    }
-}
+pub const UNKNOWN: f32 = f32::NAN;
+pub const ON: f32 = 1.0;
+pub const OFF: f32 = 0.0;

@@ -8,14 +8,9 @@ use tokio::time;
 use btleplug::api::{Central, Manager as _, Peripheral, ScanFilter};
 use btleplug::platform::Manager;
 
-use logger_lib::comm::StateBus;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // pretty_env_logger::init();
-
-    let _s = StateBus::new();
-
     let manager = Manager::new().await?;
     let adapter_list = manager.adapters().await?;
     if adapter_list.is_empty() {

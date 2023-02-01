@@ -4,8 +4,6 @@ use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use log::*;
 
-// use logger_lib::comm::StateBus;
-
 
 #[embassy_executor::task]
 async fn run() {

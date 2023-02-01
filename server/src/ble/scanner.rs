@@ -32,7 +32,7 @@ fn scan_cb(state_pub: &ImmediateStatePub<'_>, addr: &BleMacAddress, key: u8, dat
                 let temp = i16::from_le_bytes(data[3..5].try_into().unwrap()) as f32 / 100.0;
                 let humi = u16::from_le_bytes(data[5..7].try_into().unwrap()) as f32 / 100.0;
                 let batt  = data[7];
-                let dev = DeviceInstance::new(Device::Climate, 3);
+                let dev = Device::new(DeviceKind::Climate, 3);
                 state_pub.publish_immediate(State::new(dev, Attribute::Temperature, temp));
                 state_pub.publish_immediate(State::new(dev, Attribute::Humidity, humi));
                 state_pub.publish_immediate(State::new(dev, Attribute::BatteryLevel, batt as f32));
