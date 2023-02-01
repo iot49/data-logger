@@ -13,11 +13,15 @@ defmt = "0.3"
 defmt-rtt = "0.4"
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 embedded-hal = "0.2"
+embedded-hal-async = "0.2.0-alpha.0"
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
 
-embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "integrated-timers", "nightly"] }
-embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
-embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "nightly"] }
+# embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "integrated-timers", "nightly"] }
+# embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
+# embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["defmt", "nightly"] }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "integrated-timers", "nightly"] }
+embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "nightly"] }
 embassy-sync = "0.1"
 nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
 nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
@@ -35,10 +39,7 @@ bench = false
 doc = true
 
 [features]
-default = [
-    "particle-xenon",
-    # "use-heap"
-]
+default = ["particle-xenon"]
 
 use-heap       = []
 particle-xenon = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]

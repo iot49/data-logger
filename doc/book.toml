@@ -1,0 +1,6 @@
+[book]
+authors = ["Bernhard Boser"]
+language = "en"
+multilingual = false
+src = "src"
+title = "YERT: Yet another Embedded Rust Tutorial"
