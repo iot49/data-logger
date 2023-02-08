@@ -16,12 +16,6 @@
                 "resetAfterFlashing": true,
                 "haltAfterReset": true
             },
-            "coreConfigs": [
-                {
-                    "coreIndex": 0,
-                    "programBinary": "./logger/target/thumbv7em-none-eabihf/debug/${workspaceFolderBasename}"
-                }
-            ]
         }
     ]
 }
