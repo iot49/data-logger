@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 #![feature(type_alias_impl_trait)]
-#![feature(default_alloc_error_handler)]
 #![allow(unused)]
 
 // Global Heap, see https://github.com/peterstuart/cherry/tree/main/examples/ssd1306
