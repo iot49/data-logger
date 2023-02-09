@@ -1,0 +1,75 @@
+[package]
+authors = ["iot49"]
+edition = "2021"
+readme = "README.md"
+name = "nus"
+version = "0.1.0"
+
+[dependencies]
+alloc-cortex-m = "0.4"    
+cortex-m = { version = "0.7" }
+cortex-m-rt = ">=0.6,<0.8"
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+embedded-hal = "0.2"
+embedded-hal-async = "0.2.0-alpha.0"
+futures = { version = "0.3", default-features = false, features = ["async-await"] }
+static_cell = "1.0"
+uuid = { version = "1.3", default-features = false }
+array-concat = "0.5.2"
+heapless = "0.7.16"
+
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "integrated-timers", "nightly"] }
+embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "nightly"] }
+embassy-sync = "0.1"
+nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
+nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
+
+
+[[bin]]
+name = "nus"
+test = false
+bench = false
+doc = true
+
+[features]
+# IMPORTANT: also change runner args in .cargo/config.toml when enabling heap
+default = [
+    "particle-xenon",
+    # "use-heap",
+    # "ble-l2cap",
+    "ble-gatt-server",
+    # "ble-gatt-client",
+    # "ble-sec",
+]
+
+use-heap       = []
+
+particle-xenon = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
+microbit-v2    = ["embassy-nrf/nrf52833", "nrf-softdevice/nrf52833"]
+
+ble-gatt-server = ["nrf-softdevice/ble-gatt-server"]
+ble-gatt-client = ["nrf-softdevice/ble-gatt-client"]
+ble-l2cap = ["nrf-softdevice/ble-l2cap"]
+ble-sec = ["nrf-softdevice/ble-sec"]
+
+# cargo build/run
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true # <-
+incremental = false
+opt-level = 3 # <-
+overflow-checks = true # <-
+
+# cargo build/run --release
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false # <-
+incremental = false
+lto = 'fat'
+opt-level = 3 # <-
+overflow-checks = false # <-
