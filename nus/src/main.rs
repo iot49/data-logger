@@ -30,7 +30,8 @@ use crate::boards::particle_xenon as bsp;
 #[cfg(feature = "microbit-v2")]
 use crate::boards::microbit_v2 as bsp;
 
-const _HEAP_SIZE: usize = 128*1024;
+/// deliberately small during development to assess space requirements
+const _HEAP_SIZE: usize = 16*1024;
 
 
 #[embassy_executor::main]
@@ -56,7 +57,7 @@ async fn main(spawner: Spawner) {
 
     // Bluetooth
     //let sd = ble::config::start_softdevice(spawner, "Nus Test");
-    unwrap!(spawner.spawn(ble::x::main_task()));
+    unwrap!(spawner.spawn(ble::setup::main_task()));
 
     info!("main: tasks started.");
 

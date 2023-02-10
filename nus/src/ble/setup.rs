@@ -1,3 +1,9 @@
+/// Setup and start bluetooth:
+/// 1. Softdevice (ble::Config)
+/// 2. Advertisement
+/// 3. Peripheral Server (NusService etc)
+/// 4. Scanner
+
 use defmt::*;
 
 use nrf_softdevice::{raw, Softdevice};
@@ -7,32 +13,24 @@ use nrf_softdevice::ble::gatt_server::{CharacteristicHandles, RegisterError, Wri
 use nrf_softdevice::ble::{gatt_server, peripheral, Connection, Uuid};
 
 use embassy_executor::Spawner;
-use embassy_time::{Timer, Duration};
 
 use futures::future::{select, Either};
 use futures::pin_mut;
 use uuid::uuid;
 use array_concat::concat_arrays;
 
-use super::battery_service::BatteryService;
-use super::nus_service::{NusService, NusData};
-use super::config::{softdevice_config, softdevice_task};
-
-const NAME: &[u8; 8] = b"Nus Test";
-
-const NUS_SV_UUID: &[u8; 16] = &uuid!("6e400001-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
-
+use super::config::{NAME, softdevice_config, softdevice_task};
+use super::nus_service::{NusService, NusData, NUS_SV_UUID, nus_fut};
+use super::scanner;
 
 struct Server {
-    bas: BatteryService,
     nus: NusService,
 }
 
 impl Server {
     pub fn new(sd: &mut Softdevice) -> Result<Self, RegisterError> {
-        let bas = BatteryService::new(sd)?;
         let nus: NusService = NusService::new(sd)?;
-        Ok(Self { bas, nus })
+        Ok(Self { nus })
     }
 }
 
@@ -47,10 +45,9 @@ impl gatt_server::Server for Server {
         _offset: usize,
         data: &[u8],
     ) -> Option<Self::Event> {
-        info!("--- gatt_server::on_write op={} offset={} data={}", _op, _offset, data.len());
+        debug!("--- gatt_server::on_write op={} offset={} data={}", _op, _offset, data.len());
         self.nus.on_write(handle, data);
-        self.bas.on_write(handle, data);
-        None
+       None
     }
 }
 
@@ -65,11 +62,16 @@ pub async fn main_task() {
     );
     let scan_data = &[];
 
-    let sd = Softdevice::enable(&softdevice_config(NAME));
+    // Note: start server before spawning softdevice_task to avoid borrow conflicts
+    let sd = Softdevice::enable(&softdevice_config());
     let server = unwrap!(Server::new(sd));
     let spawner: Spawner = Spawner::for_current_executor().await;
     unwrap!(spawner.spawn(softdevice_task(sd)));
 
+    // scanner
+    unwrap!(spawner.spawn(scanner::main_task(sd)));
+
+    // peripheral
     loop {
         info!("Advertise ...");
         let config = peripheral::Config::default();
@@ -79,7 +81,7 @@ pub async fn main_task() {
         info!("Connecting ...");
 
         // let data_fut = bat_fut(sd, &server, &conn);
-        let data_fut = nus_fut(&server, &conn);
+        let data_fut = nus_fut(&server.nus, &conn);
         let gatt_fut = gatt_server::run(&conn, &server, |e| info!("gatt_server::run {}", e));
 
         info!("Connected ...");
@@ -102,36 +104,4 @@ pub async fn main_task() {
     }
 }
 
-async fn nus_fut<'a>(server: &'a Server, connection: &'a Connection) {
-    for i in 0..255 {
-        let c = b'a' + (i%26);
-        let mut val = NusData::from_slice(b"msg 0123456789 0123456789 0123456789").unwrap();
-        // let mut val = NusData::from_slice(b"msg ").unwrap();
-        val.push(c);
-        
-        match server.nus.tx_notify(connection, &val) {
-            Ok(_) => (),
-            Err(_) => {
-                // info!("nus.tx_notify failed for {} - client has notifications disabled?", c);
-            }
-        }
-        Timer::after(Duration::from_secs(1)).await
-    }
-}
-
-async fn bat_fut<'a>(sd: &'a Softdevice, server: &'a Server, connection: &'a Connection) {
-    for i in 0..100 {
-        let batt_raw_value: u8 = i;
-
-        match server.bas.battery_level_notify(connection, batt_raw_value) {
-            Ok(_) => info!("Battery raw_value: {}", batt_raw_value),
-            Err(_) => {
-                info!("Battery set {}", batt_raw_value);
-                unwrap!(server.bas.battery_level_set(sd, batt_raw_value));
-            }
-        };
-
-        Timer::after(Duration::from_secs(1)).await
-    }
-}
 

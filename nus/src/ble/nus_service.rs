@@ -1,6 +1,7 @@
 use defmt::*;
 use uuid::uuid;
 use heapless::Vec as HeaplessVec;
+use embassy_time::{Timer, Duration};
 use nrf_softdevice::ble::gatt_server::builder::ServiceBuilder;
 use nrf_softdevice::ble::gatt_server::characteristic::{Attribute, Metadata, Properties};
 use nrf_softdevice::ble::gatt_server::{NotifyValueError, RegisterError, Service, WriteOp, indicate_value};
@@ -8,9 +9,9 @@ use nrf_softdevice::ble::{gatt_server, peripheral, Connection, GattValue, Uuid};
 use nrf_softdevice::{raw, Softdevice};
 
 
-const NUS_SV_UUID: &[u8; 16] = &uuid!("6e400001-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
-const NUS_RX_UUID: &[u8; 16] = &uuid!("6e400002-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
-const NUS_TX_UUID: &[u8; 16] = &uuid!("6e400003-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
+pub const NUS_SV_UUID: &[u8; 16] = &uuid!("6e400001-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
+pub const NUS_RX_UUID: &[u8; 16] = &uuid!("6e400002-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
+pub const NUS_TX_UUID: &[u8; 16] = &uuid!("6e400003-b5a3-f393-e0a9-e50e24dcca9e").to_u128_le().to_be_bytes();
 
 // const NUS_MAX_LEN: usize = 20;
 const NUS_MAX_LEN: usize = 180;
@@ -101,3 +102,20 @@ pub enum NusServiceEvent {
     TxCccdWrite { notifications: bool },
 }
 
+
+pub async fn nus_fut<'a>(service: &'a NusService, connection: &'a Connection) {
+    for i in 0..255 {
+        let c = b'a' + (i%26);
+        let mut val = NusData::from_slice(b"msg 0123456789 0123456789 0123456789").unwrap();
+        // let mut val = NusData::from_slice(b"msg ").unwrap();
+        val.push(c);
+        
+        match service.tx_notify(connection, &val) {
+            Ok(_) => (),
+            Err(_) => {
+                // info!("nus.tx_notify failed for {} - client has notifications disabled?", c);
+            }
+        }
+        Timer::after(Duration::from_secs(1)).await
+    }
+}

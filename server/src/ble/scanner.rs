@@ -5,7 +5,6 @@
 // s140 api: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_gsg_ses%2FUG%2Fgsg%2Fsoftdevices.html
 
 
-use core::slice;
 use defmt::*;
 use nrf_softdevice::ble::central;
 use nrf_softdevice::Softdevice;
@@ -53,7 +52,7 @@ fn scan_cb(state_pub: &ImmediateStatePub<'_>, addr: &BleMacAddress, key: u8, dat
 
 
 #[embassy_executor::task]
-pub async fn main_task(sd: &'static Softdevice, comm: &'static StateBus) {
+pub async fn main_task(sd: &'static Softdevice) {
     debug!("scanner::main_task started");
     let state_pub = comm.immediate_publisher();
     // filter advertisements by peer addresses
