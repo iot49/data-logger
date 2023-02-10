@@ -27,44 +27,32 @@ impl ScanResult<'_> {
 
     /// advertisement flags, 0 if not in advertising message
     pub fn type_flags(&self) -> u8 {
-        if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_FLAGS) {
-            v[0]
-        } else {
-            0
-        }
+        self.val(raw::BLE_GAP_AD_TYPE_FLAGS).unwrap_or(&[0])[0]
     }
 
     /// Complete or short name, empty string if not available
     pub fn name(&self) -> &str {
         if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME) {
-            if let Ok(s) = core::str::from_utf8(v) {
-                return s
-            } else if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME) {
-                if let Ok(s) = core::str::from_utf8(v) {
-                    return s
-                }
-            }
+            core::str::from_utf8(v).unwrap_or("")
+        } else if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME) {
+            core::str::from_utf8(v).unwrap_or("")
+        } else {
+            ""
         }
-        ""
     }
 
     /// Manufacturer data (key 0xff), empty array if none
     pub fn manufacturer_data(&self) -> &[u8] {
-        if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA) {
-            v
-        } else {
-            &[]
-        }
+        self.val(raw::BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA).unwrap_or(&[])
     }
 
     /// Complete or incomplete list of advertised 16-bit UUIDs, empty array if none
     pub fn uuid_16(&self) -> &[u8] {
         if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE) {
-            return v
-        } else if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE) {
-            return v
+            v
+        } else {
+            self.val(raw::BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE).unwrap_or(&[])
         }
-        &[]
     }
 
 }
