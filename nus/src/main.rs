@@ -23,7 +23,10 @@ use futures::future::{select, Either};
 use futures::pin_mut;
 
 mod boards;
+mod comm;
 mod ble;
+mod states;
+
 
 #[cfg(feature = "particle-xenon")]
 use crate::boards::particle_xenon as bsp;
@@ -44,6 +47,9 @@ async fn main(spawner: Spawner) {
     #[cfg(feature = "use-heap")]
     init_heap();
 
+    // communication channels
+    static COMM: comm::Comm = comm::Comm::new();
+
     // remap interrupts for soft-device
     let mut config = embassy_nrf::config::Config::default();
     config.gpiote_interrupt_priority = Priority::P2;
@@ -56,10 +62,22 @@ async fn main(spawner: Spawner) {
     info!("initializations done, now start the app ...");
 
     // Bluetooth
-    //let sd = ble::config::start_softdevice(spawner, "Nus Test");
-    unwrap!(spawner.spawn(ble::setup::main_task()));
+    unwrap!(spawner.spawn(ble::main_task(&COMM)));
+
+    // State filter
+    unwrap!(spawner.spawn(states::main_task(&COMM)));
 
     info!("main: tasks started.");
+
+    loop {
+        for i in 0..255 {
+            let c = b'a' + (i%26);
+            let mut s = comm::LogString::from("Log ");
+            s.push(c as char);
+            COMM.log_string(s).await;
+            Timer::after(Duration::from_secs(1)).await;
+        }
+    }
 
 }
 

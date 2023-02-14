@@ -11,11 +11,6 @@ pub const ATT_MTU: u16 = 185;
 const ATTR_TAB_SIZE: u32 = raw::BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
 
 
-#[embassy_executor::task]
-pub async fn softdevice_task(sd: &'static Softdevice) -> ! {
-    debug!("start softdevice");
-    sd.run().await
-}
 
 
 pub fn softdevice_config() -> nrf_softdevice::Config {

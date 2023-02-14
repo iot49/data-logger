@@ -1,7 +1,7 @@
 /// Setup and start bluetooth:
 /// 1. Softdevice (ble::Config)
 /// 2. Advertisement
-/// 3. Peripheral Server (NusService etc)
+/// 3. Peripheral Server (NusService)
 /// 4. Scanner
 
 use defmt::*;
@@ -19,9 +19,15 @@ use futures::pin_mut;
 use uuid::uuid;
 use array_concat::concat_arrays;
 
-use super::config::{NAME, softdevice_config, softdevice_task};
-use super::nus_service::{NusService, NusData, NUS_SV_UUID, nus_fut};
-use super::scanner;
+mod config;
+mod scanner;
+mod nus_service;
+
+use config::*;
+use scanner::*;
+use nus_service::*;
+
+use super::comm::Comm;
 
 struct Server {
     nus: NusService,
@@ -37,6 +43,7 @@ impl Server {
 impl gatt_server::Server for Server {
     type Event = ();
 
+    /// receiver
     fn on_write(
         &self,
         _conn: &Connection,
@@ -53,7 +60,7 @@ impl gatt_server::Server for Server {
 
 
 #[embassy_executor::task]
-pub async fn main_task() {
+pub async fn main_task(comm: &'static Comm) {
     #[rustfmt::skip]
     let adv_data: &[u8; 3+18+2+NAME.len()] = &concat_arrays!(
         [ 2u8, raw::BLE_GAP_AD_TYPE_FLAGS as u8, raw::BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE as u8, ],
@@ -69,7 +76,7 @@ pub async fn main_task() {
     unwrap!(spawner.spawn(softdevice_task(sd)));
 
     // scanner
-    unwrap!(spawner.spawn(scanner::main_task(sd)));
+    unwrap!(spawner.spawn(scanner::main_task(sd, comm)));
 
     // peripheral
     loop {
@@ -81,7 +88,7 @@ pub async fn main_task() {
         info!("Connecting ...");
 
         // let data_fut = bat_fut(sd, &server, &conn);
-        let data_fut = nus_fut(&server.nus, &conn);
+        let data_fut = nus_fut(comm, &server.nus, &conn);
         let gatt_fut = gatt_server::run(&conn, &server, |e| info!("gatt_server::run {}", e));
 
         info!("Connected ...");
@@ -105,3 +112,8 @@ pub async fn main_task() {
 }
 
 
+#[embassy_executor::task]
+async fn softdevice_task(sd: &'static Softdevice) -> ! {
+    debug!("start softdevice");
+    sd.run().await
+}

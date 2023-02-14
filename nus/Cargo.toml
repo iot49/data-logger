@@ -24,9 +24,11 @@ embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", rev = "c
 embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "time-driver-rtc1", "gpiote", "nightly"], optional = true }
 embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "c21cc21c622de5527668671c61f677baf7924cf3", features = ["defmt", "nightly"] }
 embassy-sync = "0.1"
+embassy-futures = "0.1"
 nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
 nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
 
+logger-lib = { path = "../lib", features = ["defmt"] }
 
 [[bin]]
 name = "nus"
@@ -39,10 +41,8 @@ doc = true
 default = [
     "particle-xenon",
     # "use-heap",
-    # "ble-l2cap",
     "ble-gatt-server",
     # "ble-gatt-client",
-    # "ble-sec",
 ]
 
 use-heap       = []
@@ -51,25 +51,23 @@ particle-xenon = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
 microbit-v2    = ["embassy-nrf/nrf52833", "nrf-softdevice/nrf52833"]
 
 ble-gatt-server = ["nrf-softdevice/ble-gatt-server"]
-ble-gatt-client = ["nrf-softdevice/ble-gatt-client"]
-ble-l2cap = ["nrf-softdevice/ble-l2cap"]
-ble-sec = ["nrf-softdevice/ble-sec"]
+# ble-gatt-client = ["nrf-softdevice/ble-gatt-client"]
 
 # cargo build/run
 [profile.dev]
 codegen-units = 1
 debug = 2
-debug-assertions = true # <-
+debug-assertions = true
 incremental = false
-opt-level = 3 # <-
-overflow-checks = true # <-
+opt-level = 3
+overflow-checks = true
 
 # cargo build/run --release
 [profile.release]
 codegen-units = 1
 debug = 2
-debug-assertions = false # <-
+debug-assertions = false
 incremental = false
 lto = 'fat'
-opt-level = 3 # <-
-overflow-checks = false # <-
+opt-level = 3
+overflow-checks = false
