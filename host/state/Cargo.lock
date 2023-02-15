@@ -39,12 +39,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "crc8"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b31d2174830f395fd7e413c2f8a119252de36356982f805f495269331e97559e"
-
-[[package]]
 name = "critical-section"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -76,6 +70,12 @@ dependencies = [
  "futures-util",
  "heapless",
 ]
+
+[[package]]
+name = "embedded-crc-macros"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f1c75747a43b086df1a87fb2a889590bc0725e0abf54bba6d0c4bf7bd9e762c"
 
 [[package]]
 name = "embedded-hal"
@@ -168,8 +168,8 @@ dependencies = [
 name = "logger-lib"
 version = "0.1.0"
 dependencies = [
- "crc8",
  "embassy-time",
+ "embedded-crc-macros",
  "heapless",
  "num-derive",
  "num-traits",

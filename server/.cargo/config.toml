@@ -8,8 +8,8 @@ rustflags = [
 
 # DISABLE --measure-stack if allocation is used
 #         subtract size of heap from result!
-runner = "probe-run --measure-stack"
-# runner = "probe-run"
+# runner = "probe-run --measure-stack"
+runner = "probe-run"
 
 [build]
 target = "thumbv7em-none-eabihf"

@@ -9,12 +9,12 @@ use super::timestamp::Timestamp;
 const CAPACITY: usize = 64;
 type StatesMap = HeaplessMap<Entity, Filter, CAPACITY>;
 
+// #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct FilteredStates {
     states: StatesMap,
 }
 
 
-#[cfg_attr(feature = "defmt", derive(Format))]
 impl FilteredStates {
 
     pub fn new() -> Self {

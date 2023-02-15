@@ -1,0 +1,13 @@
+{
+    "rust-analyzer.cargo.target": "thumbv7em-none-eabihf",
+    "rust-analyzer.checkOnSave.allTargets": false,
+    "rust-analyzer.cargo-watch.allTargets": false,
+    "rust-analyzer.cargo-watch.arguments": [
+        "--target",
+        "thumbv7em-none-eabihf"
+    ],
+    "rust.target": "thumbv7em-none-eabihf",
+    "rust.all_targets": false,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 160,
+}

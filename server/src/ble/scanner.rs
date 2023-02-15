@@ -1,86 +1,108 @@
-// advertisement keys: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.s140.api.v6.0.0%2Fgroup___b_l_e___g_a_p___a_d_v___t_y_p_e_s.html
-// adv types: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.s140.api.v6.0.0%2Fgroup___b_l_e___g_a_p___a_d_v___t_y_p_e_s.html
-// "tutorial": https://community.silabs.com/s/article/kba-bt-0201-bluetooth-advertising-data-basics?language=en_US
-// service ids: https://btprodspecificationrefs.blob.core.windows.net/assigned-values/16-bit%20UUID%20Numbers%20Document.pdf
-// s140 api: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_gsg_ses%2FUG%2Fgsg%2Fsoftdevices.html
-
-
 use defmt::*;
 use nrf_softdevice::ble::central;
-use nrf_softdevice::Softdevice;
-use nrf_softdevice::ble::AddressType;
-use nrf_softdevice::ble::Address;
+use nrf_softdevice::{raw, Softdevice};
+use nrf_softdevice_s140::ble_gap_scan_params_t;
+use core::slice;
+use heapless::LinearMap as HeaplessMap;
 
-use crate::comm::{StateBus, ImmediateStatePub};
+use crate::comm::Comm;
 use logger_lib::state_types::*;
 
-const ADDRESS_FILTER: bool = true;
+pub type BleMacAddress = [u8; 6];
+pub type ScanData<'a> = HeaplessMap<u32, &'a [u8], 6>;
 
-type BleMacAddress = [u8; 6];
+pub struct ScanResult<'a> {
+    pub mac_address: BleMacAddress,
+    pub rssi: i8,
+    pub data: ScanData<'a>,
+}
 
-fn scan_cb(state_pub: &ImmediateStatePub<'_>, addr: &BleMacAddress, key: u8, data: &[u8], rssi: i8) {
-    match key {
-        0x09 => { // name
-            let name = core::str::from_utf8(&data).unwrap();
-            if name.starts_with("Govee_H5074") {
-                debug!("{:x} {}dBm {}", addr, rssi, name);
-            }
-        },
-        0xff => { // manufacturer data
-            if data.len() == 9 && data[0] == 0x88 && data[1] == 0xec {
-                let temp = i16::from_le_bytes(data[3..5].try_into().unwrap()) as f32 / 100.0;
-                let humi = u16::from_le_bytes(data[5..7].try_into().unwrap()) as f32 / 100.0;
-                let batt  = data[7];
-                let dev = Device::new(DeviceKind::Climate, 3);
-                state_pub.publish_immediate(State::new(dev, Attribute::Temperature, temp));
-                state_pub.publish_immediate(State::new(dev, Attribute::Humidity, humi));
-                state_pub.publish_immediate(State::new(dev, Attribute::BatteryLevel, batt as f32));
-                state_pub.publish_immediate(State::new(dev, Attribute::Rssi, rssi as f32));
-                debug!("{:x} {}dBm T = {}C  H = {}%  batt = {}%", addr, rssi, temp, humi, batt);
-            } else {
-                debug!("{:x} {}dBm 0x{:02x} len={} {:x}", addr, rssi, key, data.len(), data);
-            }
-        },
-        0x01 => {
-        },
-        _ => {
-            debug!("{:x} {}dBm 0x{:02x} len={} {:x}", addr, rssi, key, data.len(), data);
+impl ScanResult<'_> {
+
+    /// advertisement for specified key
+    pub fn val(&self, key: u32) -> Option<&[u8]> {
+       if let Some(v) = self.data.get(&key) {
+            return Some(*v)
+        }
+        None
+    }
+
+    /// advertisement flags, 0 if not in advertising message
+    pub fn type_flags(&self) -> u8 {
+        self.val(raw::BLE_GAP_AD_TYPE_FLAGS).unwrap_or(&[0])[0]
+    }
+
+    /// Complete or short name, empty string if not available
+    pub fn name(&self) -> &str {
+        if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME) {
+            core::str::from_utf8(v).unwrap_or("")
+        } else if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME) {
+            core::str::from_utf8(v).unwrap_or("")
+        } else {
+            ""
         }
     }
+
+    /// Manufacturer data (key 0xff), empty array if none
+    pub fn manufacturer_data(&self) -> &[u8] {
+        self.val(raw::BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA).unwrap_or(&[])
+    }
+
+    /// Complete or incomplete list of advertised 16-bit UUIDs, empty array if none
+    pub fn uuid_16(&self) -> &[u8] {
+        if let Some(v) = self.val(raw::BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE) {
+            v
+        } else {
+            self.val(raw::BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE).unwrap_or(&[])
+        }
+    }
+
 }
 
 
-
+/// Continuously scan for BLE advertisements
 #[embassy_executor::task]
-pub async fn main_task(sd: &'static Softdevice) {
-    debug!("scanner::main_task started");
-    let state_pub = comm.immediate_publisher();
-    // filter advertisements by peer addresses
+pub async fn main_task(sd: &'static Softdevice, comm: &'static Comm) {
+    debug!("scanner::main_task starting");
     let mut config = central::ScanConfig::default();
-    let address = Address::new(AddressType::Public, [0x84, 0x8c, 0x26, 0x38, 0xc1, 0xa4]);
-    let addresses = [&address];
-    if ADDRESS_FILTER {
-        config.whitelist = Option::Some(&addresses);
-    }
     let res = central::scan(sd, &config, |params| unsafe {
         let mut data = slice::from_raw_parts(params.data.p_data, params.data.len as usize);
+        let mut sr = ScanResult {
+            mac_address: params.peer_addr.addr,
+            rssi: params.rssi,
+            data: ScanData::new()
+        };
         while data.len() != 0 {
             let len = data[0] as usize;
-            if data.len() < len + 1 {
-                // warn!("Advertisement data truncated?");
-                break;
-            }
-            if len < 1 {
-                // warn!("Advertisement data malformed?");
-                break;
-            }
+            // ignore ill-formed advertisement data
+            if len < 1 || data.len() < len + 1 { break; }
             let key = data[1];
             let value = &data[2..len + 1];
-            scan_cb(&state_pub, &params.peer_addr.addr, key, value, params.rssi);  
+            let _ = sr.data.insert(key as u32, value);
             data = &data[len + 1..];
-        }
+        };
+        parse_adv(&sr, comm);
+        debug!("Scan result for {} with uuids {:x}: {:x} {}dBm", sr.name(), sr.uuid_16(), sr.mac_address, sr.rssi);
         None
     }).await;
     unwrap!(res);
     error!("scanner::main_task returned");
+}
+
+
+pub fn parse_adv(adv: &ScanResult, comm: &Comm) {
+    let data = adv.manufacturer_data();
+    if data.len() == 9 && data[0] == 0x88 && data[1] == 0xec {
+        // very likely a Govee H5074, should be sufficient to identify
+        let temp = i16::from_le_bytes(data[3..5].try_into().unwrap()) as Value / 100.0;
+        let humi = u16::from_le_bytes(data[5..7].try_into().unwrap()) as Value / 100.0;
+        let batt  = data[7];
+        let dev = Device::new(DeviceType::Climate, 3);
+        comm.publish_state(dev, Attribute::Temperature, temp);
+        comm.publish_state(dev, Attribute::Humidity, humi);
+        comm.publish_state(dev, Attribute::BatteryLevel, batt as Value);
+        comm.publish_state(dev, Attribute::Rssi, adv.rssi as Value);
+        debug!("{:x} {}dBm T = {}C  H = {}%  batt = {}%", adv.mac_address, adv.rssi, temp, humi, batt);
+    }
+    // add other devices (e.g. Victron) here ...
 }

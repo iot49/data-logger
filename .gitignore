@@ -8,12 +8,14 @@ book/
 .gdb_history
 */out
 *old
+OLD*
 
 # Secrets
 secrets.*
 *Serial_Number*
 
 # Cloned repos & downloaded stuff
+.github
 resources/
 doc/nrf52/
 lsm6ds3tr/
