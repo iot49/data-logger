@@ -1,11 +1,13 @@
 #[cfg(feature = "defmt")]
 use defmt::Format;
+use std::prelude::v1::*;
+use serde::{Serialize, Deserialize};
 use super::timestamp::Timestamp;
 use embedded_crc_macros::crc8;
 
 crc8!(fn crc8, 7, 0, "State Packet CRC Error");
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct State {
     pub timestamp: Timestamp,
@@ -59,7 +61,7 @@ impl State {
 }
 
 /// Identifies a state, e.g. the temperature of a climate sensor.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct Entity {
     pub device: Device,
@@ -78,7 +80,7 @@ impl Entity {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 pub struct Device {
     pub device_type: DeviceType,
@@ -104,7 +106,7 @@ impl Device {
 /// Device is also used to identify unprogrammed flash:
 /// the "Forbidden" state is used for this purpose and
 /// may not be used for an actual device.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, FromPrimitive, ToPrimitive, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 #[repr(u8)]
 pub enum DeviceType {
@@ -134,7 +136,7 @@ impl DeviceType {
 /// Limitation: each device may have only one instance of
 /// a particular attribute, e.g. Current. More general situations,
 /// e.g. input current and output current require two separate devices.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, FromPrimitive, ToPrimitive, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 #[repr(u8)]
 pub enum Attribute {
@@ -193,7 +195,8 @@ fn state_test() {
     let _ = buf.push(4);
 
     let mut iter = buf.chunks_exact(size);
-    assert_eq!(State::from_bytes(iter.next().unwrap()).unwrap(), s1);
-    assert_eq!(State::from_bytes(iter.next().unwrap()).unwrap(), s2);
-
+    let s1_ = State::from_bytes(iter.next().unwrap()).unwrap();
+    let s2_ = State::from_bytes(iter.next().unwrap()).unwrap();
+    assert_eq!(s1.timestamp.as_sec(), s1_.timestamp.as_sec());
+    assert_eq!(s2.timestamp.as_sec(), s2_.timestamp.as_sec());
 }

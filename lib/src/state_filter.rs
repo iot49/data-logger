@@ -2,49 +2,43 @@
  
 #[cfg(feature = "defmt")]
 use defmt::*;
-use heapless::LinearMap as HeaplessMap;
+// use std::prelude::v1::*;
+use std::collections::BTreeMap;
 use super::state_types::{Entity, Value};
 use super::timestamp::Timestamp;
 
-const CAPACITY: usize = 64;
-type StatesMap = HeaplessMap<Entity, Filter, CAPACITY>;
+type StatesMap = BTreeMap<Entity, Filter>;
 
 // #[cfg_attr(feature = "defmt", derive(Format))]
-pub struct FilteredStates {
-    states: StatesMap,
-}
+pub struct FilteredStates(StatesMap);
 
 
 impl FilteredStates {
 
     pub fn new() -> Self {
-        Self {
-            states: StatesMap::new()
-        }
+        Self(StatesMap::new())
     }
 
     pub fn update_state(&mut self, entity: Entity, x: f32) {
-        if let Some(state) = self.states.get_mut(&entity) {
+        if let Some(state) = self.0.get_mut(&entity) {
             state.update_state(x);
       } else {
             // Register new Entity
-            // TODO: determine time_constant and abs_tol from Attribute
-            let time_constant = 0.1;
+            // TODO: determine wc=1/tau and abs_tol from Attribute
+            let wc: f32 = 10.0;
             let abs_tol = 0.5;
-            let state = Filter::new(x, time_constant, abs_tol);
-            if self.states.insert(entity, state).is_err() {
-
-            }
+            let state = Filter::new(x, wc, abs_tol);
+            self.0.insert(entity, state);
         };
     }
 
     pub fn value(&self, entity: &Entity) -> f32 {
-        let state = self.states.get(entity).unwrap();
+        let state = self.0.get(entity).unwrap();
         state.value
     }
 
     pub fn timestamp(&self, entity: &Entity) -> Timestamp {
-        let state = self.states.get(entity).unwrap();
+        let state = self.0.get(entity).unwrap();
         state.timestamp
     }
 
@@ -59,26 +53,25 @@ struct Filter {
     /// filter state: y[k-1], x[k-1], t[k-1]
     yk1: f32, xk1: f32,  tk1: Timestamp,
     /// filter parameters; time_constant same unit as timestamp [sec]
-    tau: f32,
+    wc: f32,
     abs_tol: f32
 
 }
 
 impl Filter {
-    fn new(value: Value, tau: f32, abs_tol: f32) -> Self {
+    fn new(value: Value, wc: f32, abs_tol: f32) -> Self {
         let t = Timestamp::now();
         Self {
             value: value,
             timestamp: t,
             yk1: value, xk1: value, tk1: t,
-            tau: tau,
+            wc: wc,
             abs_tol: abs_tol
         }
     }
 
     fn update_state(&mut self, x: f32) {
         let ts = Timestamp::now();
-        // Current value
         let value = self.value;
         if abs(value-x) > self.abs_tol {
             // Dramatic change, ignore filter
@@ -92,7 +85,7 @@ impl Filter {
             // 1st Order bilinear LPF
             #[allow(non_snake_case)]
             let T = ts - self.tk1;
-            let tr = T/self.tau;
+            let tr = T*self.wc;
             let y = (2.0-tr)*self.yk1 + tr*(x+self.xk1);
             let y = y / (2.0+tr);
             // update state

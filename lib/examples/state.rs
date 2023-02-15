@@ -5,7 +5,7 @@ crc8!(fn crc8, 7, 0, "State Packet CRC Error");
 
 
 fn main() {
-    let dev = Device::new(DeviceKind::Climate, 0);
+    let dev = Device::new(DeviceType::Climate, 0);
     let s1 = State::new(dev, Attribute::Temperature, 21.4);
     let s2 = State::new(dev, Attribute::Humidity, 33.0);
 
