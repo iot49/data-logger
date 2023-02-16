@@ -30,6 +30,7 @@ mod comm;
 mod ble;
 mod gps;
 mod imu;
+mod flash;
 mod states;
 
 #[cfg(feature = "particle-xenon")]
@@ -61,7 +62,10 @@ async fn main(spawner: Spawner) {
     let p = embassy_nrf::init(config);
 
     // get peripherals
-    let (gps_peripherals, imu_peripherals) = bsp::init(p);
+    let (gps_peripherals, imu_peripherals, qspi_peripherals) = bsp::init(p);
+
+    // QSPI Flash: supports Littlefs and History
+    unwrap!(spawner.spawn(flash::main_task(&COMM, qspi_peripherals)));
 
     // IMU
     unwrap!(spawner.spawn(imu::main_task(imu_peripherals)));

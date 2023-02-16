@@ -2,6 +2,7 @@ use defmt::debug;
 use embassy_nrf::{interrupt, peripherals, Peripherals};
 use embassy_nrf::interrupt::InterruptExt;
 
+
 pub type GpsUarte = peripherals::UARTE0;
 pub type GpsUarteInterrupt = interrupt::UARTE0_UART0;
 pub type GpsUarteRxPin = peripherals::P0_08;
@@ -26,8 +27,30 @@ pub struct ImuPeripherals {
     pub i2c_scl_pin: ImuI2CSclPin,
 }
 
+pub const QSPI_FLASH_SIZE: usize = 4*1024*1024;
+pub const QSPI_FLASH_PAGE_SIZE: usize = 4096;
 
-pub fn init(p: Peripherals) -> (GpsPeripherals, ImuPeripherals) {
+pub type Qspi = peripherals::QSPI;
+pub type QspiInterrupt = interrupt::QSPI;
+pub type QspiSckPin = peripherals::P0_19;
+pub type QspiCsnPin = peripherals::P0_17;
+pub type QspiIo0 = peripherals::P0_20;
+pub type QspiIo1 = peripherals::P0_21;
+pub type QspiIo2 = peripherals::P0_22;
+pub type QspiIo3 = peripherals::P0_23;
+
+pub struct QspiPeripherals {
+    pub qspi: Qspi,
+    pub interrupt: QspiInterrupt,
+    pub sck: QspiSckPin,
+    pub csn: QspiCsnPin,
+    pub io0: QspiIo0,
+    pub io1: QspiIo1,
+    pub io2: QspiIo2,
+    pub io3: QspiIo3,
+}
+
+pub fn init(p: Peripherals) -> (GpsPeripherals, ImuPeripherals, QspiPeripherals) {
     debug!("board::particle_xenon init called");
 
     let irq = interrupt::take!(UARTE0_UART0);
@@ -48,5 +71,17 @@ pub fn init(p: Peripherals) -> (GpsPeripherals, ImuPeripherals) {
         i2c_scl_pin: p.P0_27,
     };
 
-    (gps, imu)
+    let irq = interrupt::take!(QSPI);
+    let qspi = QspiPeripherals {
+        qspi: p.QSPI,
+        interrupt: irq,
+        sck: p.P0_19,
+        csn: p.P0_17,
+        io0: p.P0_20,
+        io1: p.P0_21,
+        io2: p.P0_22,
+        io3: p.P0_23,        
+    };
+
+    (gps, imu, qspi)
 }
