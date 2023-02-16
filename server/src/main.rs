@@ -54,8 +54,6 @@ async fn main(spawner: Spawner) {
     // communication channels
     static COMM: comm::Comm = comm::Comm::new();
 
-    logger_lib::msg::foo();
-
     // remap interrupts for soft-device
     let mut config = embassy_nrf::config::Config::default();
     config.gpiote_interrupt_priority = Priority::P2;

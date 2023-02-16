@@ -100,7 +100,7 @@ pub fn parse_adv(adv: &ScanResult, comm: &Comm) {
         let dev = Device::new(DeviceType::Climate, 3);
         comm.publish_state(dev, Attribute::Temperature, temp);
         comm.publish_state(dev, Attribute::Humidity, humi);
-        comm.publish_state(dev, Attribute::BatteryLevel, batt as Value);
+        comm.publish_state(dev, Attribute::Battery_Level, batt as Value);
         comm.publish_state(dev, Attribute::Rssi, adv.rssi as Value);
         debug!("{:x} {}dBm T = {}C  H = {}%  batt = {}%", adv.mac_address, adv.rssi, temp, humi, batt);
     }
