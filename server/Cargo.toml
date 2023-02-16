@@ -2,10 +2,12 @@
 authors = ["iot49"]
 edition = "2021"
 readme = "README.md"
-name = "nus"
+name = "server"
 version = "0.1.0"
 
 [dependencies]
+no-std-compat = { version = "0.4", features = [ "alloc" ] }
+logger-lib = { path = "../lib", default-features = false, features = ["defmt"] }
 alloc-cortex-m = "0.4"    
 cortex-m = { version = "0.7" }
 cortex-m-rt = ">=0.6,<0.8"
@@ -28,10 +30,8 @@ embassy-futures = "0.1"
 nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
 nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
 
-logger-lib = { path = "../lib", features = ["defmt"] }
-
 [[bin]]
-name = "nus"
+name = "server"
 test = false
 bench = false
 doc = true
@@ -40,7 +40,7 @@ doc = true
 # IMPORTANT: also change runner args in .cargo/config.toml when enabling heap
 default = [
     "particle-xenon",
-    # "use-heap",
+    "use-heap",
     "ble-gatt-server",
     # "ble-gatt-client",
 ]

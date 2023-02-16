@@ -5,18 +5,19 @@
 use defmt::Format;
 use std::prelude::v1::*;
 use serde::{Serialize, Deserialize};
+
 use super::state_types::{Device, Entity, State};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 enum Cmd {
     /// Update state value
-    Update(State),
+    UpdateState(State),
     /// Send history for specified entity
     GetHistory(Entity),
-    SendHistory{entity: Entity, values: Vec::<State>},
+    History{entity: Entity, values: Vec::<State>},
     /// Send all current state values
-    Current,
+    SendState,
 
     /// Log message
     Log(String),
@@ -25,9 +26,9 @@ enum Cmd {
     OnOff{ dev: Device, brightness: f32 },
 
     /// Get/send files
-    PutFile(String),
     GetFile(String),
-    FileData(Vec::<u8>),
-    CloseFile,
-    Dir,
+    FileData(String, Vec::<u8>),
+    ListDir,
 }
+
+

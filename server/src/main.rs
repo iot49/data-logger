@@ -3,6 +3,9 @@
 #![feature(type_alias_impl_trait)]
 #![allow(unused)]
 
+extern crate no_std_compat as std;
+use std::prelude::v1::*;
+
 // Global Heap, see https://github.com/peterstuart/cherry/tree/main/examples/ssd1306
 // https://github.com/rust-embedded/embedded-alloc/blob/master/examples/global_alloc.rs
 
@@ -29,7 +32,6 @@ mod gps;
 mod imu;
 mod states;
 
-
 #[cfg(feature = "particle-xenon")]
 use crate::boards::particle_xenon as bsp;
 #[cfg(feature = "microbit-v2")]
@@ -51,6 +53,8 @@ async fn main(spawner: Spawner) {
 
     // communication channels
     static COMM: comm::Comm = comm::Comm::new();
+
+    logger_lib::msg::foo();
 
     // remap interrupts for soft-device
     let mut config = embassy_nrf::config::Config::default();

@@ -139,21 +139,22 @@ impl DeviceType {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, FromPrimitive, ToPrimitive, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(Format))]
 #[repr(u8)]
+#[allow(non_camel_case_types)]
 pub enum Attribute {
     Unknown,
-    Voltage,      // [V]
-    Current,      // [A]
-    Power,        // [W]
-    Energy,       // [Wh] - no Joules!
-    Temperature,  // [C]
-    Humidity,     // [%]
-    Rssi,         // [dBm]
-    BatteryLevel, // [%]
-    TankLevel,    // [%]
-    Brightness,   // [%]
-    Binary,       // [On/Off]
-    Longitude,    // [deg]
-    Latitude,     // [deg]
+    Voltage,       // [V]
+    Current,       // [A]
+    Power,         // [W]
+    Energy,        // [Wh] - no Joules!
+    Temperature,   // [C]
+    Humidity,      // [%]
+    Rssi,          // [dBm]
+    Battery_Level, // [%]
+    Level,         // [%]
+    Brightness,    // [%] 0 = OFF, 100 = On
+    Binary,        // [ON/OFF], 100/0
+    Longitude,     // [deg]
+    Latitude,      // [deg]
     Forbidden = 0xff
 }
 
@@ -170,7 +171,7 @@ impl Attribute {
 pub type Value = f32;
 
 pub const UNKNOWN: Value = Value::NAN;
-pub const ON: Value = 1.0;
+pub const ON: Value = 100.0;
 pub const OFF: Value = 0.0;
 
 

@@ -6,17 +6,28 @@ version = "0.1.0"
 
 [dependencies]
 defmt = { version = "0.3", optional = true }
-strum = { version = "0.24", features = ["derive"] }
-strum_macros = "0.24"
+log = "0.4"
+env_logger = "0.10"
 no-std-compat = { version = "0.4", features = [ "alloc" ] }
 num-traits = { version = "0.2", default-features = false }
 num-derive = "0.3"
 embedded-crc-macros = "1.0"
-serde = { version = "1.0", features = ["derive"] }
 heapless = "0.7"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+embedded-msgpack = { version = "^0.3.1", features = ["alloc"] }
+# requires std
+# see https://github.com/3Hren/msgpack-rust/issues/186, last comment
+# fix? https://github.com/3Hren/msgpack-rust/pull/295
+# rmpv = { version = "^1.0",  default-features = false }
+# rmp = { version = "^0.8.11",  default-features = false }
+# rmp-serde = { version = "1.1",  default-features = false }
+# rmp-futures = "0.3"
 
 embassy-time = { git = "https://github.com/embassy-rs/embassy.git", rev = "b6c8505697f198b95545f352f6a94af24276b128", features = ["nightly"] }
 
+# strum = { version = "0.24", features = ["derive"] }
+# strum_macros = "0.24"
+
 [features]
-default = [ "std" ] # Default to using the std
+default = [ "std" ]
 std = [ "no-std-compat/std" ]
