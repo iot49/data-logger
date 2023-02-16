@@ -3,6 +3,10 @@ use crate::bsp;
 use super::comm::Comm;
 use embassy_nrf::qspi::{Qspi, Config};
 
+mod storage;
+mod history;
+mod file_system;
+
 const FLASH_SIZE: usize = bsp::QSPI_FLASH_SIZE;
 const PAGE_SIZE: usize = bsp::QSPI_FLASH_PAGE_SIZE;
 
