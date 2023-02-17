@@ -2,6 +2,7 @@ use defmt::{unwrap, info};
 use crate::bsp;
 use super::comm::Comm;
 use embassy_nrf::qspi::{Qspi, Config};
+use embassy_nrf::peripherals;
 
 mod storage;
 mod history;
@@ -14,6 +15,42 @@ const PAGE_SIZE: usize = bsp::QSPI_FLASH_PAGE_SIZE;
 // Nicer API will probably come in the future.
 #[repr(C, align(4))]
 struct AlignedBuf([u8; PAGE_SIZE]);
+
+static mut BUF: AlignedBuf = AlignedBuf([0; 4096]);
+
+struct Flash<'a> {
+    qspi: Qspi<'a, peripherals::QSPI, FLASH_SIZE>,
+}
+
+// impl<'a> ekv::flash::Flash for Flash<'a> {
+impl<'a> Flash<'a> {
+    // type Error = Infallible;
+
+    fn page_count(&self) -> usize {
+        bsp::QSPI_FLASH_MAX_PAGE_COUNT
+    }
+
+    async fn erase(&mut self, page_id: usize) {
+        self.qspi.erase(page_id * bsp::QSPI_FLASH_PAGE_SIZE).await.unwrap();
+    }
+
+    /// double buffering ... is this needed?
+    async fn read(&mut self, page_id: usize, offset: usize, data: &mut [u8]) {
+        let address = page_id * bsp::QSPI_FLASH_PAGE_SIZE + offset;
+        unsafe {
+            self.qspi.read(address, &mut BUF.0[..data.len()]).await.unwrap();
+            data.copy_from_slice(&BUF.0[..data.len()]);
+        }
+    }
+
+    async fn write(&mut self, page_id: usize, offset: usize, data: &[u8]) {
+        let address = page_id * bsp::QSPI_FLASH_PAGE_SIZE + offset;
+        unsafe {
+            BUF.0[..data.len()].copy_from_slice(data);
+            self.qspi.write(address, &BUF.0[..data.len()]).await.unwrap();
+        }
+    }
+}
 
 
 #[embassy_executor::task]
@@ -68,6 +105,29 @@ pub async fn main_task(comm: &'static Comm, p: bsp::QspiPeripherals) {
             assert_eq!(buf.0[j], pattern((j + i * PAGE_SIZE) as u32));
         }
     }
-    info!("done!")
 
+    info!("small reads and writes");
+
+    unwrap!(q.erase(0).await);
+    unwrap!(q.read(0, &mut buf.0[..256]).await);
+    info!("after erase: {}", &buf.0[..256]);
+    let _ = &buf.0[..16].copy_from_slice(b"0123456789012345");
+    unwrap!(q.write(8, &buf.0[..4]).await);
+    unwrap!(q.read(8, &mut buf.0[..4]).await);
+    info!("after write: {}", &buf.0[..4]);
+
+    // now with driver ...
+    let mut flash = Flash { qspi: q };
+
+    const PAGE: usize = 7;
+    const OFFSET: usize = 28;
+
+    flash.erase(PAGE).await;
+    flash.write(PAGE, OFFSET, b"01234567").await;
+    let mut buf = [0u8; 16];
+    flash.read(PAGE, OFFSET, &mut buf).await;
+
+    info!("----------- read {:?}", buf);
+
+   
 }

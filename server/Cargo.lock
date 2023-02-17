@@ -295,6 +295,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ekv"
+version = "0.1.0"
+source = "git+https://github.com/embassy-rs/ekv#5f42e6551278a423b31a1efcd438d86c71940518"
+dependencies = [
+ "embassy-sync 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "heapless",
+]
+
+[[package]]
 name = "embassy-cortex-m"
 version = "0.1.0"
 source = "git+https://github.com/embassy-rs/embassy.git?rev=c21cc21c622de5527668671c61f677baf7924cf3#c21cc21c622de5527668671c61f677baf7924cf3"
@@ -1114,6 +1123,7 @@ dependencies = [
  "cortex-m-rt",
  "defmt",
  "defmt-rtt",
+ "ekv",
  "embassy-executor",
  "embassy-futures",
  "embassy-nrf",

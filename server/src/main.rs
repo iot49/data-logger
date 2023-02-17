@@ -47,8 +47,7 @@ async fn main(spawner: Spawner) {
     info!("Starting ...");
 
     // optionally initialize heap (see Cargo.toml)
-    // IMPORTANT! disable to check stack usage 
-    //            (enable --measure-stack in config.toml)
+    // disable --measure-stack in config.toml
     #[cfg(feature = "use-heap")]
     init_heap();
 

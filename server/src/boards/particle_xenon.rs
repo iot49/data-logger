@@ -27,8 +27,11 @@ pub struct ImuPeripherals {
     pub i2c_scl_pin: ImuI2CSclPin,
 }
 
-pub const QSPI_FLASH_SIZE: usize = 4*1024*1024;
+/// Particle Xenon MX25L1606 4MByte Nor Flash
+pub const QSPI_FLASH_SIZE: usize = 4 * 1024 * 1024;
+pub const QSPI_FLASH_ALIGN: usize = 4;
 pub const QSPI_FLASH_PAGE_SIZE: usize = 4096;
+pub const QSPI_FLASH_MAX_PAGE_COUNT: usize = QSPI_FLASH_SIZE/QSPI_FLASH_PAGE_SIZE;
 
 pub type Qspi = peripherals::QSPI;
 pub type QspiInterrupt = interrupt::QSPI;

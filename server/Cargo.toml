@@ -5,6 +5,7 @@ readme = "README.md"
 name = "server"
 version = "0.1.0"
 resolver = "2"
+# rust-version = "1.69.0"
 
 [dependencies]
 no-std-compat = { version = "0.4", features = [ "alloc" ] }
@@ -31,6 +32,7 @@ embassy-sync = "0.1"
 embassy-futures = "0.1"
 nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice.git", features = ["defmt", "s140", "ble-peripheral", "ble-central", "critical-section-impl"] }
 nrf-softdevice-s140 = { git = "https://github.com/embassy-rs/nrf-softdevice.git" }
+ekv = { git = "https://github.com/embassy-rs/ekv", features = [ "page-size-4096", "align-4" ] }
 
 [[bin]]
 name = "server"

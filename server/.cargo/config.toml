@@ -1,5 +1,11 @@
+# [unstable]
+# build-std = ["core"]
+# build-std-features = ["panic_immediate_abort"]
+
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 rustflags = [
+    "-Z", "emit-stack-sizes",
+    "-Z", "trap-unreachable=no",
     "-C", "link-arg=-Tlink.x",
     "-C", "link-arg=-Tdefmt.x",
     "-C", "linker=flip-link",
@@ -17,10 +23,6 @@ target = "thumbv7em-none-eabihf"
 [env]
 DEFMT_LOG = "info"
 PROBE_RUN_CHIP = "nrf52840_xxAA"
-
-[alias]
-r = "run"
-rr = "run --release"
 
 # optionally specify a probe if more than one is available
 # probe-run --list-probes
