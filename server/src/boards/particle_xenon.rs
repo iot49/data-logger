@@ -1,90 +1,53 @@
 use defmt::debug;
 use embassy_nrf::{interrupt, peripherals, Peripherals};
+use embassy_nrf::peripherals::{UARTE0, QSPI, TWISPI0};
 use embassy_nrf::interrupt::InterruptExt;
+use embassy_nrf::uarte::{self, Uarte};
+use embassy_nrf::twim::{self, Twim};
+use embassy_nrf::qspi::{self, Qspi};
 
-
-pub type GpsUarte = peripherals::UARTE0;
-pub type GpsUarteInterrupt = interrupt::UARTE0_UART0;
-pub type GpsUarteRxPin = peripherals::P0_08;
-pub type GpsUarteTxPin = peripherals::P0_06;
-
-pub struct GpsPeripherals {
-    pub uarte: GpsUarte,
-    pub uarte_interrupt: GpsUarteInterrupt,
-    pub uarte_rx_pin: GpsUarteRxPin,
-    pub uarte_tx_pin: GpsUarteTxPin,
-}
-
-pub type ImuI2C = peripherals::TWISPI0;
-pub type ImuI2CInterrupt = interrupt::SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0;
-pub type ImuI2CSdaPin = peripherals::P0_26;
-pub type ImuI2CSclPin = peripherals::P0_27;
-
-pub struct ImuPeripherals {
-    pub i2c: ImuI2C,
-    pub i2c_interrupt: ImuI2CInterrupt,
-    pub i2c_sda_pin: ImuI2CSdaPin,
-    pub i2c_scl_pin: ImuI2CSclPin,
-}
 
 /// Particle Xenon MX25L1606 4MByte Nor Flash
 pub const QSPI_FLASH_SIZE: usize = 4 * 1024 * 1024;
 pub const QSPI_FLASH_ALIGN: usize = 4;
 pub const QSPI_FLASH_PAGE_SIZE: usize = 4096;
-pub const QSPI_FLASH_MAX_PAGE_COUNT: usize = QSPI_FLASH_SIZE/QSPI_FLASH_PAGE_SIZE;
 
-pub type Qspi = peripherals::QSPI;
-pub type QspiInterrupt = interrupt::QSPI;
-pub type QspiSckPin = peripherals::P0_19;
-pub type QspiCsnPin = peripherals::P0_17;
-pub type QspiIo0 = peripherals::P0_20;
-pub type QspiIo1 = peripherals::P0_21;
-pub type QspiIo2 = peripherals::P0_22;
-pub type QspiIo3 = peripherals::P0_23;
+pub type GpsUart = Uarte<'static, UARTE0>;
+pub type ImuI2C = Twim<'static, TWISPI0>;
+pub type QspiFlash = Qspi<'static, QSPI, QSPI_FLASH_SIZE>;
 
-pub struct QspiPeripherals {
-    pub qspi: Qspi,
-    pub interrupt: QspiInterrupt,
-    pub sck: QspiSckPin,
-    pub csn: QspiCsnPin,
-    pub io0: QspiIo0,
-    pub io1: QspiIo1,
-    pub io2: QspiIo2,
-    pub io3: QspiIo3,
+pub struct IO {
+    pub gps: GpsUart,
+    pub imu: ImuI2C,
+    pub flash: QspiFlash,
 }
 
-pub fn init(p: Peripherals) -> (GpsPeripherals, ImuPeripherals, QspiPeripherals) {
+
+pub fn init(p: Peripherals) -> IO {
     debug!("board::particle_xenon init called");
 
+    // gps uart
     let irq = interrupt::take!(UARTE0_UART0);
     irq.set_priority(interrupt::Priority::P3);
-    let gps = GpsPeripherals {
-        uarte: p.UARTE0,
-        uarte_interrupt: irq,
-        uarte_rx_pin: p.P0_08,
-        uarte_tx_pin: p.P0_06,
-    };
+    let mut config = uarte::Config::default();
+    config.parity = uarte::Parity::EXCLUDED;
+    config.baudrate = uarte::Baudrate::BAUD9600;
+    let gps = Uarte::new(p.UARTE0, irq, p.P0_08, p.P0_06, config);
 
     let irq = interrupt::take!(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0);
     irq.set_priority(interrupt::Priority::P3);
-    let imu = ImuPeripherals {
-        i2c: p.TWISPI0,
-        i2c_interrupt: irq,
-        i2c_sda_pin: p.P0_26,
-        i2c_scl_pin: p.P0_27,
-    };
+    let config = twim::Config::default();
+    let imu = Twim::new(p.TWISPI0, irq, p.P0_26, p.P0_27, config);
 
     let irq = interrupt::take!(QSPI);
-    let qspi = QspiPeripherals {
-        qspi: p.QSPI,
-        interrupt: irq,
-        sck: p.P0_19,
-        csn: p.P0_17,
-        io0: p.P0_20,
-        io1: p.P0_21,
-        io2: p.P0_22,
-        io3: p.P0_23,        
-    };
+    irq.set_priority(interrupt::Priority::P3);
+    let config = qspi::Config::default();
+    let flash = Qspi::new(p.QSPI, irq, p.P0_19, p.P0_17, p.P0_20, p.P0_21, p.P0_22, p.P0_23, config);
 
-    (gps, imu, qspi)
+    IO {
+        gps: gps,
+        imu: imu,
+        flash: flash,
+    }
+
 }

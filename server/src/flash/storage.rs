@@ -12,7 +12,7 @@ impl<'a> littlefs2::driver::Storage for FlashStorage {
 
     /// smallest unit that can be read
     const READ_SIZE: usize = 4;
-    /// smalles unit that can be written
+    /// smallest unit that can be written
     const WRITE_SIZE: usize = 4;
     const BLOCK_SIZE: usize = 4096;
     /// BLOCK_COUNT * BLOCK_SIZE = capacity

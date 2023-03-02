@@ -60,17 +60,11 @@ async fn main(spawner: Spawner) {
     config.time_interrupt_priority = Priority::P2;
     let p = embassy_nrf::init(config);
 
-    // get peripherals
-    let (gps_peripherals, imu_peripherals, qspi_peripherals) = bsp::init(p);
-
-    // QSPI Flash: supports Littlefs and History
-    unwrap!(spawner.spawn(flash::main_task(&COMM, qspi_peripherals)));
-
-    // IMU
-    unwrap!(spawner.spawn(imu::main_task(imu_peripherals)));
-
-    // GPS
-    unwrap!(spawner.spawn(gps::main_task(gps_peripherals)));
+    // start peripheral tasks
+    let io = bsp::init(p);
+    unwrap!(spawner.spawn(flash::main_task(&COMM, io.flash)));
+    unwrap!(spawner.spawn(imu::main_task(io.imu)));
+    unwrap!(spawner.spawn(gps::main_task(io.gps)));
 
     // Bluetooth
     unwrap!(spawner.spawn(ble::main_task(&COMM)));

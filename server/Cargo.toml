@@ -49,13 +49,11 @@ default = [
     # "ble-gatt-client",
 ]
 
-use-heap       = []
-
-particle-xenon = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
-microbit-v2    = ["embassy-nrf/nrf52833", "nrf-softdevice/nrf52833"]
-
+use-heap        = []
+particle-xenon  = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
+microbit-v2     = ["embassy-nrf/nrf52833", "nrf-softdevice/nrf52833"]
 ble-gatt-server = ["nrf-softdevice/ble-gatt-server"]
-# ble-gatt-client = ["nrf-softdevice/ble-gatt-client"]
+ble-gatt-client = ["nrf-softdevice/ble-gatt-client"]
 
 # cargo build/run
 [profile.dev]

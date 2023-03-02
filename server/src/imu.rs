@@ -2,7 +2,6 @@
 use crate::bsp;
 
 use defmt::*;
-use embassy_nrf::twim::{self, Twim};
 //use embassy_time::{Duration, Timer};
 
 //use bno055::Bno055;
@@ -10,9 +9,8 @@ use embassy_nrf::twim::{self, Twim};
 
 /// Read IMU
 #[embassy_executor::task(pool_size = 1)]
-pub async fn main_task(p: bsp::ImuPeripherals) {
+pub async fn main_task(i2c: bsp::ImuI2C) {
     debug!("imu.main_task");
-    let _i2c = init_peripherals(p);
 
     /* 
     if false {
@@ -36,13 +34,3 @@ pub async fn main_task(p: bsp::ImuPeripherals) {
     */
 }
 
-fn init_peripherals<'a>(p: bsp::ImuPeripherals) -> Twim<'a, bsp::ImuI2C> {
-    let config = twim::Config::default();
-    Twim::new(
-        p.i2c,
-        p.i2c_interrupt,
-        p.i2c_sda_pin,
-        p.i2c_scl_pin,
-        config,
-    )
-}
